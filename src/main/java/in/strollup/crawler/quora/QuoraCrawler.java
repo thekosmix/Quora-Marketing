@@ -4,7 +4,9 @@ import in.strollup.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -14,13 +16,13 @@ import org.jsoup.select.Elements;
 
 public class QuoraCrawler {
 
-	private static List<String> uniqueQuoraLinks = new ArrayList<>();
+	private static Set<String> uniqueQuoraLinks = new HashSet<>();
 	private static int count = 1;
 
 	public Document getDocument(String url) {
 		Document doc = null;
 		try {
-			doc = Jsoup.connect(url).userAgent("Mozilla").timeout(5000).get();
+			doc = Jsoup.connect(url).userAgent("Mozilla").timeout(10000).get();
 		} catch (IOException e) {
 			// log(e.getMessage());
 		}
@@ -33,7 +35,7 @@ public class QuoraCrawler {
 		String url = QuoraConstants.getUrl(keyWord, cityId);
 		Document doc = getDocument(url);
 
-		Elements els = doc.select("li.g");
+		Elements els = doc.select("div.g");
 
 		for (Element el : els) {
 			String quoraUrl = el.getElementsByTag("cite").text();
@@ -56,7 +58,7 @@ public class QuoraCrawler {
 			return;
 		}
 
-		Elements statsElements = doc.getElementsByClass("QuestionStatsSection");
+		Elements statsElements = doc.select("div.QuestionStats");
 		for (Element statsElement : statsElements) {
 			System.out.print(count++ + "\t" + url);
 			Elements statsElementValues = statsElement.getElementsByTag("strong");
@@ -75,7 +77,7 @@ public class QuoraCrawler {
 			for (Element activityElement : activityElements) {
 				String lastAsked = StringUtils.remove(activityElement.text(), "Last asked: ");
 				if (!lastAsked.contains("201")) {
-					lastAsked = lastAsked + ", 2015";
+					lastAsked = lastAsked + ", 2016";
 				}
 				System.out.println("\t" + lastAsked);
 			}
